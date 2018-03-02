@@ -41,6 +41,15 @@ public class WechatUtil {
 		return fromUserName.equals(me);
 	}
 	
+	
+	/**
+	 * 是我发消息给文件助手
+	 */
+	public static boolean isMeChatToFileHelper(String fromUserName, String toUserName) {
+		String me = ApplicationContextWrap.getBean(RobotCache.class).getLoginSession().getUserName();
+		return fromUserName.equals(me) && toUserName.equals("filehelper");
+	}
+	
 	/**
 	 * 是群消息
 	 * @param fromUserName 发信人（谁发的）

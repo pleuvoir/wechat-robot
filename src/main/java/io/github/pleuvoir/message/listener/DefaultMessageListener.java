@@ -5,13 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
+import io.github.pleuvoir.cache.RobotCache;
 import io.github.pleuvoir.domain.Message;
 import io.github.pleuvoir.domain.RetCode;
 import io.github.pleuvoir.domain.Selector;
 import io.github.pleuvoir.domain.SyncCheckResponse;
 import io.github.pleuvoir.domain.SyncResponse;
 import io.github.pleuvoir.exception.WechatException;
-import io.github.pleuvoir.message.handle.MessageHandle;
+import io.github.pleuvoir.message.handle.MessageHandler;
 import io.github.pleuvoir.time.SleepUtil;
 import io.github.pleuvoir.wechat.WechatInternalService;
 import io.github.pleuvoir.wechat.impl.DefaultWechatService;
@@ -19,18 +20,19 @@ import io.github.pleuvoir.wechat.impl.DefaultWechatService;
 @Service
 public class DefaultMessageListener implements MessageListener {
 
-	private static Logger logger = LoggerFactory.getLogger(DefaultWechatService.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultWechatService.class);
 	
 	@Autowired
 	private WechatInternalService wechatInternalService;
 	@Autowired
-	private MessageHandle messageHandle;
-	
+	private MessageHandler messageHandle;
+	@Autowired
+	private RobotCache robotCache;
 	
 	@Override
 	public void onEvent() {
 		logger.info("[*] 心跳轮询拉取消息开始");
-		while (true) {
+		while (robotCache.robotIsAlive()) {
 			SleepUtil.sleep(2);
 			SyncCheckResponse syncCheck = wechatInternalService.syncCheck();
 			logger.debug(JSON.toJSONString(syncCheck));
@@ -53,6 +55,5 @@ public class DefaultMessageListener implements MessageListener {
 		    }
 		}
 	}
-	
 
 }

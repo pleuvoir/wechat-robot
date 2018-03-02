@@ -7,7 +7,7 @@ import io.github.pleuvoir.domain.Message;
  * @author pleuvoir
  *
  */
-public interface MessageHandle {
+public interface MessageHandler {
 	
 	/**
 	 * 当收到消息时触发
@@ -33,5 +33,10 @@ public interface MessageHandle {
 	 * 当我私聊别人文本消息时触发
 	 */
 	void onMeSendTextToPerson(Message message);
+	
+	/**
+	 * 当我给文件助手发消息时触发
+	 */
+	void onMeSendTextToFileHelper(Message message);
 	
 }

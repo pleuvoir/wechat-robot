@@ -7,17 +7,17 @@ import com.alibaba.fastjson.JSON;
 import io.github.pleuvoir.domain.Message;
 import io.github.pleuvoir.factory.RobotRouteFactory;
 import io.github.pleuvoir.utils.WechatUtil;
-import io.github.pleuvoir.wechat.WechatInternalService;
+import io.github.pleuvoir.wechat.WechatService;
 
 
-public abstract class AbstactMessageHandle implements MessageHandle {
+public abstract class AbstactMessageHandler implements MessageHandler {
 
-	protected static Logger logger = LoggerFactory.getLogger(MessageHandle.class);
+	protected static final Logger logger = LoggerFactory.getLogger(MessageHandler.class);
 	
 	@Autowired
-	protected RobotRouteFactory robotRouteFactory;
+	private RobotRouteFactory robotRouteFactory;
 	@Autowired
-	private WechatInternalService wechatInternalService;
+	private WechatService wechatService;
 	
 	@Override
 	public void onNewMessage(Message msg) {
@@ -36,6 +36,7 @@ public abstract class AbstactMessageHandle implements MessageHandle {
 		String toUserName = msg.getToUserName(); 		// 发给谁的
 		String fromUserName = msg.getFromUserName(); 	// 谁发的
 		String content = msg.getContent(); 				// 消息内容
+		
 		// 如果是群聊消息
 		if (WechatUtil.isGroupMessage(fromUserName)) {
 			// 从带有其他符号的内容中获得真实的消息内容
@@ -48,9 +49,16 @@ public abstract class AbstactMessageHandle implements MessageHandle {
 			}
 			return;
 		}
-		// 如果是私聊
+		
+		// 如果是别人私聊我
 		if (WechatUtil.isPrivateMessage(toUserName)) {
 			onPrivateTextMessage(msg);
+			return;
+		}
+		
+		// 如果是我发消息给文件助手
+		if(WechatUtil.isMeChatToFileHelper(fromUserName, toUserName)){
+			onMeSendTextToFileHelper(msg);
 			return;
 		}
 		
@@ -59,6 +67,7 @@ public abstract class AbstactMessageHandle implements MessageHandle {
 			onMeSendTextToPerson(msg);
 			return;
 		}
+		
 		logger.warn("这是一个神奇的消息，到了这里的到底是什么？{}", JSON.toJSON(msg));
 	}
 	
@@ -70,7 +79,7 @@ public abstract class AbstactMessageHandle implements MessageHandle {
 	 */
 	protected void replyByRobot(String toUserName, String content) {
 		String response = robotRouteFactory.route().sendMessage(content);
-		wechatInternalService.sendMessage(toUserName, response);
+		wechatService.sendMessage(toUserName, response);
 	}
 
 }

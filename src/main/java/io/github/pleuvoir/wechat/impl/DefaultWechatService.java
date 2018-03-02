@@ -16,7 +16,6 @@ import lombok.SneakyThrows;
 public class DefaultWechatService implements WechatService {
 
 	private static Logger logger = LoggerFactory.getLogger(DefaultWechatService.class);
-	
 	@Autowired
 	private WechatInternalService wechatInternalService;
 	
@@ -70,6 +69,18 @@ public class DefaultWechatService implements WechatService {
         String qr = QRCodeUtils.generateQR(qrUrl, 40, 40);
         logger.info("\r\n" + qr);
 		logger.info("[*] 二维码已显示，请注意扫描");
+	}
+
+
+	@Override
+	public void sendMessage(String toUserName, String message) {
+		wechatInternalService.sendMessage(toUserName, message);
+	}
+
+
+	@Override
+	public void sendMessageTofilehelper(String message) {
+		sendMessage("filehelper", message);
 	}
 
 }
